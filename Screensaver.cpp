@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
             ultimoReporteFPS = ahora;
 
             char titulo[128];
-            std::snprintf(titulo, sizeof(titulo), "PoC Screensaver - Serpientes IA (FPS: %.2f)", fpsActual);
+            std::snprintf(titulo, sizeof(titulo), "Multisnake (FPS: %.2f)", fpsActual);
             SDL_SetWindowTitle(ventana, titulo);
         }
     }
