@@ -1,4 +1,4 @@
-# CC3069 - Proyecto 1: Screensaver "Serpientes IA"
+# CC3069 - Proyecto 1: Screensaver "Multisnake"
 
 Universidad del Valle de Guatemala - Computación Paralela y Distribuida
 
