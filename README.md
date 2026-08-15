@@ -56,3 +56,6 @@ El ejecutable acepta un parámetro opcional `N` para el número de segmentos de 
 ```
 
 Presiona `Esc` o cierra la ventana para salir.
+
+<img width="802" height="627" alt="image" src="https://github.com/user-attachments/assets/97a72afa-6ca0-4489-886c-1874a11b5b52" />
+
