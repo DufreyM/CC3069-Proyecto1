@@ -1,0 +1,11 @@
+# Binarios compilados
+*.exe
+*.dll
+*.o
+*.obj
+
+# Librerias descargadas (SDL2 dev, ~7MB, se descarga aparte)
+libs/
+
+# VSCode
+.vscode/
