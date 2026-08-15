@@ -76,7 +76,14 @@ int main(int argc, char* argv[]) {
         serpiente[i].y = ALTO_VENTANA / 2.0f;
     }
 
+    std::vector<Segmento> serpiente2(numSegmentos);
+    for (int i = 0; i < numSegmentos; ++i) {
+        serpiente2[i].x = 500.0f + i * (RADIO_SEGMENTO * 1.6f);
+        serpiente2[i].y = ALTO_VENTANA / 3.0f;
+    }
+
     float velX = 2.5f, velY = 1.8f;
+    float vel2X = -2.0f, vel2Y = 2.3f;
 
     bool ejecutando = true;
     SDL_Event evento;
@@ -105,17 +112,39 @@ int main(int argc, char* argv[]) {
             serpiente[i].y = serpiente[i - 1].y;
         }
 
+        Segmento& cabeza2 = serpiente2[0];
+        cabeza2.x += vel2X;
+        cabeza2.y += vel2Y;
+        if (cabeza2.x - RADIO_SEGMENTO < 0 || cabeza2.x + RADIO_SEGMENTO > ANCHO_VENTANA) vel2X = -vel2X;
+        if (cabeza2.y - RADIO_SEGMENTO < 0 || cabeza2.y + RADIO_SEGMENTO > ALTO_VENTANA) vel2Y = -vel2Y;
+
+        // Cada segmento toma la posicion que tenia el anterior (efecto de cola)
+        for (int i = numSegmentos - 1; i > 0; --i) {
+            serpiente2[i].x = serpiente2[i - 1].x;
+            serpiente2[i].y = serpiente2[i - 1].y;
+        }
+
         SDL_SetRenderDrawColor(renderer, 25, 25, 35, 255);
         SDL_RenderClear(renderer);
 
         for (int i = 0; i < numSegmentos; ++i) {
             if (i == 0) {
-                SDL_SetRenderDrawColor(renderer, 80, 220, 120, 255);
+                SDL_SetRenderDrawColor(renderer, 255, 102, 178, 255);
             } else {
-                SDL_SetRenderDrawColor(renderer, 40, 160, 90, 255);
+                SDL_SetRenderDrawColor(renderer, 200, 80, 150, 255);
             }
             dibujarCirculoRelleno(renderer, static_cast<int>(serpiente[i].x),
                                    static_cast<int>(serpiente[i].y), RADIO_SEGMENTO);
+        }
+
+        for (int i = 0; i < numSegmentos; ++i) {
+            if (i == 0) {
+                SDL_SetRenderDrawColor(renderer, 200, 100, 255, 255);
+            } else {
+                SDL_SetRenderDrawColor(renderer, 150, 50, 200, 255);
+            }
+            dibujarCirculoRelleno(renderer, static_cast<int>(serpiente2[i].x),
+                                   static_cast<int>(serpiente2[i].y), RADIO_SEGMENTO);
         }
 
         SDL_RenderPresent(renderer);
