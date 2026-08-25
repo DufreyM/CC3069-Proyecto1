@@ -12,12 +12,14 @@
 #include <SDL2/SDL.h>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <vector>
 
 static const int ANCHO_VENTANA = 640;   // minimo exigido (640x480)
 static const int ALTO_VENTANA  = 480;   // minimo exigido
 static const int RADIO_SEGMENTO = 8;
-static const int NUM_SEGMENTOS  = 12;
+static const int SEGMENTOS_POR_SERPIENTE = 12;
 
 struct Segmento {
     float x, y;
@@ -36,6 +38,33 @@ void dibujarCirculoRelleno(SDL_Renderer* renderer, int cx, int cy, int radio) {
         int dx = static_cast<int>(std::sqrt(static_cast<double>(radio * radio - dy * dy)));
         SDL_RenderDrawLine(renderer, cx - dx, cy + dy, cx + dx, cy + dy);
     }
+}
+
+// Numero pseudoaleatorio en [minimo, maximo]
+float aleatorioEnRango(float minimo, float maximo) {
+    return minimo + static_cast<float>(std::rand()) / RAND_MAX * (maximo - minimo);
+}
+
+// Crea una serpiente con posicion inicial, velocidad y color pseudoaleatorios
+Serpiente crearSerpiente() {
+    Serpiente s;
+    s.segmentos.resize(SEGMENTOS_POR_SERPIENTE);
+
+    float xInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, ANCHO_VENTANA - RADIO_SEGMENTO * 2.0f);
+    float yInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, ALTO_VENTANA - RADIO_SEGMENTO * 2.0f);
+    for (int i = 0; i < SEGMENTOS_POR_SERPIENTE; ++i) {
+        s.segmentos[i].x = xInicial - i * (RADIO_SEGMENTO * 1.6f);
+        s.segmentos[i].y = yInicial;
+    }
+
+    s.velX = aleatorioEnRango(1.5f, 3.5f) * (std::rand() % 2 == 0 ? 1.0f : -1.0f);
+    s.velY = aleatorioEnRango(1.5f, 3.5f) * (std::rand() % 2 == 0 ? 1.0f : -1.0f);
+
+    s.r = static_cast<Uint8>(aleatorioEnRango(80.0f, 255.0f));
+    s.g = static_cast<Uint8>(aleatorioEnRango(80.0f, 255.0f));
+    s.b = static_cast<Uint8>(aleatorioEnRango(80.0f, 255.0f));
+
+    return s;
 }
 
 // Avanza la cabeza, rebota en los bordes y propaga la posicion al resto de la cola
@@ -65,13 +94,15 @@ void dibujarSerpiente(SDL_Renderer* renderer, const Serpiente& s) {
 }
 
 int main(int argc, char* argv[]) {
-    int numSegmentos = NUM_SEGMENTOS;
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+    int numSerpientes = 5;
     if (argc > 1) {
         int valor = std::atoi(argv[1]);
         if (valor > 0) {
-            numSegmentos = valor;
+            numSerpientes = valor;
         } else {
-            std::fprintf(stderr, "Aviso: parametro N invalido, usando valor por defecto (%d)\n", NUM_SEGMENTOS);
+            std::fprintf(stderr, "Aviso: parametro N invalido, usando valor por defecto (%d)\n", numSerpientes);
         }
     }
 
@@ -81,7 +112,7 @@ int main(int argc, char* argv[]) {
     }
 
     SDL_Window* ventana = SDL_CreateWindow(
-        "PoC Screensaver - Serpientes IA (FPS: --)",
+        "Multisnake (FPS: --)",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         ANCHO_VENTANA, ALTO_VENTANA,
         SDL_WINDOW_SHOWN
@@ -102,25 +133,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::vector<Serpiente> serpientes(2);
-
-    serpientes[0].segmentos.resize(numSegmentos);
-    for (int i = 0; i < numSegmentos; ++i) {
-        serpientes[0].segmentos[i].x = 100.0f - i * (RADIO_SEGMENTO * 1.6f);
-        serpientes[0].segmentos[i].y = ALTO_VENTANA / 2.0f;
+    std::vector<Serpiente> serpientes;
+    serpientes.reserve(numSerpientes);
+    for (int i = 0; i < numSerpientes; ++i) {
+        serpientes.push_back(crearSerpiente());
     }
-    serpientes[0].velX = 2.5f;
-    serpientes[0].velY = 1.8f;
-    serpientes[0].r = 255; serpientes[0].g = 102; serpientes[0].b = 178;
-
-    serpientes[1].segmentos.resize(numSegmentos);
-    for (int i = 0; i < numSegmentos; ++i) {
-        serpientes[1].segmentos[i].x = 500.0f + i * (RADIO_SEGMENTO * 1.6f);
-        serpientes[1].segmentos[i].y = ALTO_VENTANA / 3.0f;
-    }
-    serpientes[1].velX = -2.0f;
-    serpientes[1].velY = 2.3f;
-    serpientes[1].r = 200; serpientes[1].g = 100; serpientes[1].b = 255;
 
     bool ejecutando = true;
     SDL_Event evento;
@@ -158,7 +175,7 @@ int main(int argc, char* argv[]) {
             ultimoReporteFPS = ahora;
 
             char titulo[128];
-            std::snprintf(titulo, sizeof(titulo), "Multisnake (FPS: %.2f)", fpsActual);
+            std::snprintf(titulo, sizeof(titulo), "Multisnake N=%d (FPS: %.2f)", numSerpientes, fpsActual);
             SDL_SetWindowTitle(ventana, titulo);
         }
     }
