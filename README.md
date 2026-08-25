@@ -49,11 +49,13 @@ g++ Screensaver.cpp -o Screensaver $(sdl2-config --cflags --libs)
 
 ## Uso
 
-El ejecutable acepta un parámetro opcional `N` para el número de segmentos de la serpiente:
+El ejecutable acepta un parámetro opcional `N` para el número de serpientes a renderizar (por defecto 5, rango válido 1-200). Cada serpiente se genera con posición, velocidad y color pseudoaleatorios:
 
 ```bash
 ./Screensaver.exe 20
 ```
+
+Si `N` no es un número válido o está fuera de rango, el programa avisa por consola y continúa con un valor seguro en lugar de fallar.
 
 Presiona `Esc` o cierra la ventana para salir.
 
