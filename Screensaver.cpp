@@ -23,12 +23,44 @@ struct Segmento {
     float x, y;
 };
 
+struct Serpiente {
+    std::vector<Segmento> segmentos;
+    float velX, velY;
+    Uint8 r, g, b;
+};
+
 // Circulo relleno via scanline: por cada fila dy, dibuja una linea horizontal
 // del ancho correspondiente a la cuerda del circulo en esa altura.
 void dibujarCirculoRelleno(SDL_Renderer* renderer, int cx, int cy, int radio) {
     for (int dy = -radio; dy <= radio; ++dy) {
         int dx = static_cast<int>(std::sqrt(static_cast<double>(radio * radio - dy * dy)));
         SDL_RenderDrawLine(renderer, cx - dx, cy + dy, cx + dx, cy + dy);
+    }
+}
+
+// Avanza la cabeza, rebota en los bordes y propaga la posicion al resto de la cola
+void actualizarSerpiente(Serpiente& s) {
+    Segmento& cabeza = s.segmentos[0];
+    cabeza.x += s.velX;
+    cabeza.y += s.velY;
+    if (cabeza.x - RADIO_SEGMENTO < 0 || cabeza.x + RADIO_SEGMENTO > ANCHO_VENTANA) s.velX = -s.velX;
+    if (cabeza.y - RADIO_SEGMENTO < 0 || cabeza.y + RADIO_SEGMENTO > ALTO_VENTANA) s.velY = -s.velY;
+
+    for (int i = static_cast<int>(s.segmentos.size()) - 1; i > 0; --i) {
+        s.segmentos[i] = s.segmentos[i - 1];
+    }
+}
+
+void dibujarSerpiente(SDL_Renderer* renderer, const Serpiente& s) {
+    for (std::size_t i = 0; i < s.segmentos.size(); ++i) {
+        if (i == 0) {
+            SDL_SetRenderDrawColor(renderer, s.r, s.g, s.b, 255);
+        } else {
+            // cuerpo un poco mas oscuro que la cabeza para distinguirla
+            SDL_SetRenderDrawColor(renderer, s.r * 3 / 4, s.g * 3 / 4, s.b * 3 / 4, 255);
+        }
+        dibujarCirculoRelleno(renderer, static_cast<int>(s.segmentos[i].x),
+                               static_cast<int>(s.segmentos[i].y), RADIO_SEGMENTO);
     }
 }
 
@@ -70,20 +102,25 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::vector<Segmento> serpiente(numSegmentos);
-    for (int i = 0; i < numSegmentos; ++i) {
-        serpiente[i].x = 100.0f - i * (RADIO_SEGMENTO * 1.6f);
-        serpiente[i].y = ALTO_VENTANA / 2.0f;
-    }
+    std::vector<Serpiente> serpientes(2);
 
-    std::vector<Segmento> serpiente2(numSegmentos);
+    serpientes[0].segmentos.resize(numSegmentos);
     for (int i = 0; i < numSegmentos; ++i) {
-        serpiente2[i].x = 500.0f + i * (RADIO_SEGMENTO * 1.6f);
-        serpiente2[i].y = ALTO_VENTANA / 3.0f;
+        serpientes[0].segmentos[i].x = 100.0f - i * (RADIO_SEGMENTO * 1.6f);
+        serpientes[0].segmentos[i].y = ALTO_VENTANA / 2.0f;
     }
+    serpientes[0].velX = 2.5f;
+    serpientes[0].velY = 1.8f;
+    serpientes[0].r = 255; serpientes[0].g = 102; serpientes[0].b = 178;
 
-    float velX = 2.5f, velY = 1.8f;
-    float vel2X = -2.0f, vel2Y = 2.3f;
+    serpientes[1].segmentos.resize(numSegmentos);
+    for (int i = 0; i < numSegmentos; ++i) {
+        serpientes[1].segmentos[i].x = 500.0f + i * (RADIO_SEGMENTO * 1.6f);
+        serpientes[1].segmentos[i].y = ALTO_VENTANA / 3.0f;
+    }
+    serpientes[1].velX = -2.0f;
+    serpientes[1].velY = 2.3f;
+    serpientes[1].r = 200; serpientes[1].g = 100; serpientes[1].b = 255;
 
     bool ejecutando = true;
     SDL_Event evento;
@@ -100,51 +137,15 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        Segmento& cabeza = serpiente[0];
-        cabeza.x += velX;
-        cabeza.y += velY;
-        if (cabeza.x - RADIO_SEGMENTO < 0 || cabeza.x + RADIO_SEGMENTO > ANCHO_VENTANA) velX = -velX;
-        if (cabeza.y - RADIO_SEGMENTO < 0 || cabeza.y + RADIO_SEGMENTO > ALTO_VENTANA) velY = -velY;
-
-        // Cada segmento toma la posicion que tenia el anterior (efecto de cola)
-        for (int i = numSegmentos - 1; i > 0; --i) {
-            serpiente[i].x = serpiente[i - 1].x;
-            serpiente[i].y = serpiente[i - 1].y;
-        }
-
-        Segmento& cabeza2 = serpiente2[0];
-        cabeza2.x += vel2X;
-        cabeza2.y += vel2Y;
-        if (cabeza2.x - RADIO_SEGMENTO < 0 || cabeza2.x + RADIO_SEGMENTO > ANCHO_VENTANA) vel2X = -vel2X;
-        if (cabeza2.y - RADIO_SEGMENTO < 0 || cabeza2.y + RADIO_SEGMENTO > ALTO_VENTANA) vel2Y = -vel2Y;
-
-        // Cada segmento toma la posicion que tenia el anterior (efecto de cola)
-        for (int i = numSegmentos - 1; i > 0; --i) {
-            serpiente2[i].x = serpiente2[i - 1].x;
-            serpiente2[i].y = serpiente2[i - 1].y;
+        for (Serpiente& s : serpientes) {
+            actualizarSerpiente(s);
         }
 
         SDL_SetRenderDrawColor(renderer, 25, 25, 35, 255);
         SDL_RenderClear(renderer);
 
-        for (int i = 0; i < numSegmentos; ++i) {
-            if (i == 0) {
-                SDL_SetRenderDrawColor(renderer, 255, 102, 178, 255);
-            } else {
-                SDL_SetRenderDrawColor(renderer, 200, 80, 150, 255);
-            }
-            dibujarCirculoRelleno(renderer, static_cast<int>(serpiente[i].x),
-                                   static_cast<int>(serpiente[i].y), RADIO_SEGMENTO);
-        }
-
-        for (int i = 0; i < numSegmentos; ++i) {
-            if (i == 0) {
-                SDL_SetRenderDrawColor(renderer, 200, 100, 255, 255);
-            } else {
-                SDL_SetRenderDrawColor(renderer, 150, 50, 200, 255);
-            }
-            dibujarCirculoRelleno(renderer, static_cast<int>(serpiente2[i].x),
-                                   static_cast<int>(serpiente2[i].y), RADIO_SEGMENTO);
+        for (const Serpiente& s : serpientes) {
+            dibujarSerpiente(renderer, s);
         }
 
         SDL_RenderPresent(renderer);
