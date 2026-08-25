@@ -20,6 +20,9 @@ static const int ANCHO_VENTANA = 640;   // minimo exigido (640x480)
 static const int ALTO_VENTANA  = 480;   // minimo exigido
 static const int RADIO_SEGMENTO = 8;
 static const int SEGMENTOS_POR_SERPIENTE = 12;
+static const int N_POR_DEFECTO = 5;
+static const int N_MIN = 1;
+static const int N_MAX = 200; // limite defensivo para no degradar los FPS
 
 struct Segmento {
     float x, y;
@@ -93,18 +96,35 @@ void dibujarSerpiente(SDL_Renderer* renderer, const Serpiente& s) {
     }
 }
 
+// Lee y valida el parametro N (cantidad de serpientes). Si falta o es invalido,
+// avisa por stderr y ajusta a un valor seguro en lugar de fallar.
+int leerParametroN(int argc, char* argv[]) {
+    if (argc <= 1) {
+        return N_POR_DEFECTO;
+    }
+
+    char* fin = nullptr;
+    long valor = std::strtol(argv[1], &fin, 10);
+    if (fin == argv[1] || *fin != '\0') {
+        std::fprintf(stderr, "Aviso: N='%s' no es un numero valido, usando valor por defecto (%d)\n",
+                     argv[1], N_POR_DEFECTO);
+        return N_POR_DEFECTO;
+    }
+    if (valor < N_MIN) {
+        std::fprintf(stderr, "Aviso: N=%ld fuera de rango, usando minimo (%d)\n", valor, N_MIN);
+        return N_MIN;
+    }
+    if (valor > N_MAX) {
+        std::fprintf(stderr, "Aviso: N=%ld excede el maximo soportado, usando maximo (%d)\n", valor, N_MAX);
+        return N_MAX;
+    }
+    return static_cast<int>(valor);
+}
+
 int main(int argc, char* argv[]) {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    int numSerpientes = 5;
-    if (argc > 1) {
-        int valor = std::atoi(argv[1]);
-        if (valor > 0) {
-            numSerpientes = valor;
-        } else {
-            std::fprintf(stderr, "Aviso: parametro N invalido, usando valor por defecto (%d)\n", numSerpientes);
-        }
-    }
+    int numSerpientes = leerParametroN(argc, argv);
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
