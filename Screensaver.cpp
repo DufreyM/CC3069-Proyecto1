@@ -21,9 +21,10 @@ static const int ANCHO_VENTANA = 640;   // minimo exigido (640x480)
 static const int ALTO_VENTANA  = 480;   // minimo exigido
 static const int RADIO_SEGMENTO = 8;
 static const int SEGMENTOS_POR_SERPIENTE = 12;
-static const int N_POR_DEFECTO = 5;
+static const int N_POR_DEFECTO = 6;
 static const int N_MIN = 1;
 static const int N_MAX = 200; // limite defensivo para no degradar los FPS
+static const int RADIO_COMIDA = 6;
 
 struct Segmento {
     float x, y;
@@ -32,6 +33,11 @@ struct Segmento {
 struct Serpiente {
     std::vector<Segmento> segmentos;
     float velX, velY;
+    Uint8 r, g, b;
+};
+
+struct Comida {
+    Segmento posicion;
     Uint8 r, g, b;
 };
 
@@ -201,6 +207,63 @@ int leerParametroN(int argc, char* argv[]) {
     return static_cast<int>(valor);
 }
 
+// LÓGICA PARA LA GENERACIÓN DE COMIDA
+Comida crearComida() {
+    Comida comida;
+
+    comida.posicion.x = aleatorioEnRango(
+        RADIO_COMIDA,
+        ANCHO_VENTANA - RADIO_COMIDA
+    );
+
+    comida.posicion.y = aleatorioEnRango(
+        RADIO_COMIDA,
+        ALTO_VENTANA - RADIO_COMIDA
+    );
+
+    comida.r = 255;
+    comida.g = 80;
+    comida.b = 80;
+
+    return comida;
+}
+
+void dibujarComida(SDL_Renderer* renderer, const Comida& comida) {
+    SDL_SetRenderDrawColor(
+        renderer,
+        comida.r,
+        comida.g,
+        comida.b,
+        255
+    );
+
+    dibujarCirculoRelleno(
+        renderer,
+        static_cast<int>(comida.posicion.x),
+        static_cast<int>(comida.posicion.y),
+        RADIO_COMIDA
+    );
+}
+
+bool serpienteComeComida(const Serpiente& serpiente, const Comida& comida) {
+    const Segmento& cabeza = serpiente.segmentos[0];
+
+    float dx = cabeza.x - comida.posicion.x;
+    float dy = cabeza.y - comida.posicion.y;
+
+    float distanciaCuadrada = dx * dx + dy * dy;
+    float distanciaMinima = RADIO_SEGMENTO + RADIO_COMIDA;
+
+    return distanciaCuadrada <= distanciaMinima * distanciaMinima;
+}
+
+void hacerCrecer(Serpiente& serpiente) {
+    if (!serpiente.segmentos.empty()) {
+        // Agrega un segmento en la posición actual de la cola.
+        serpiente.segmentos.push_back(serpiente.segmentos.back());
+    }
+}
+
 int main(int argc, char* argv[]) {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
@@ -246,6 +309,8 @@ int main(int argc, char* argv[]) {
     double fpsActual = 0.0;
     Uint32 ultimoReporteFPS = SDL_GetTicks();
 
+    Comida comida = crearComida();
+
     while (ejecutando) {
         while (SDL_PollEvent(&evento)) {
             if (evento.type == SDL_QUIT) ejecutando = false;
@@ -258,6 +323,14 @@ int main(int argc, char* argv[]) {
             actualizarSerpiente(s);
         }
 
+        for (Serpiente& s : serpientes) {
+            if (serpienteComeComida(s, comida)) {
+                hacerCrecer(s);
+                comida = crearComida();
+                break;
+            }
+        }
+
         eliminarSerpientesColisionadas(serpientes);
         if (serpientes.size() <= 1) {
             serpientes.clear();
@@ -266,6 +339,8 @@ int main(int argc, char* argv[]) {
                 serpientes.push_back(crearSerpiente());
             }
 
+            comida = crearComida();
+
             contadorFrames = 0;
             fpsActual = 0.0;
             ultimoReporteFPS = SDL_GetTicks();
@@ -273,6 +348,7 @@ int main(int argc, char* argv[]) {
 
         SDL_SetRenderDrawColor(renderer, 25, 25, 35, 255);
         SDL_RenderClear(renderer);
+        dibujarComida(renderer, comida);
 
         for (const Serpiente& s : serpientes) {
             dibujarSerpiente(renderer, s);
