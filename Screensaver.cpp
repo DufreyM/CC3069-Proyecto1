@@ -10,6 +10,7 @@
  */
 
 #include <SDL2/SDL.h>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -72,15 +73,94 @@ Serpiente crearSerpiente() {
 
 // Avanza la cabeza, rebota en los bordes y propaga la posicion al resto de la cola
 void actualizarSerpiente(Serpiente& s) {
-    Segmento& cabeza = s.segmentos[0];
-    cabeza.x += s.velX;
-    cabeza.y += s.velY;
-    if (cabeza.x - RADIO_SEGMENTO < 0 || cabeza.x + RADIO_SEGMENTO > ANCHO_VENTANA) s.velX = -s.velX;
-    if (cabeza.y - RADIO_SEGMENTO < 0 || cabeza.y + RADIO_SEGMENTO > ALTO_VENTANA) s.velY = -s.velY;
-
+    // Primero, cada segmento toma la posición anterior del segmento delantero.
     for (int i = static_cast<int>(s.segmentos.size()) - 1; i > 0; --i) {
         s.segmentos[i] = s.segmentos[i - 1];
     }
+
+    Segmento& cabeza = s.segmentos[0];
+    cabeza.x += s.velX;
+    cabeza.y += s.velY;
+
+    if (cabeza.x - RADIO_SEGMENTO < 0) {
+        cabeza.x = RADIO_SEGMENTO;
+        s.velX = std::fabs(s.velX);
+    } else if (cabeza.x + RADIO_SEGMENTO > ANCHO_VENTANA) {
+        cabeza.x = ANCHO_VENTANA - RADIO_SEGMENTO;
+        s.velX = -std::fabs(s.velX);
+    }
+
+    if (cabeza.y - RADIO_SEGMENTO < 0) {
+        cabeza.y = RADIO_SEGMENTO;
+        s.velY = std::fabs(s.velY);
+    } else if (cabeza.y + RADIO_SEGMENTO > ALTO_VENTANA) {
+        cabeza.y = ALTO_VENTANA - RADIO_SEGMENTO;
+        s.velY = -std::fabs(s.velY);
+    }
+}
+
+// Determina si dos segmentos circulares se están tocando.
+bool segmentosColisionan(const Segmento& a, const Segmento& b) {
+    float dx = a.x - b.x;
+    float dy = a.y - b.y;
+    float distanciaCuadrada = dx * dx + dy * dy;
+    float distanciaMinima = RADIO_SEGMENTO * 2.0f;
+
+    return distanciaCuadrada <= distanciaMinima * distanciaMinima;
+}
+
+// Elimina las serpientes cuya cabeza chocó contra otra serpiente.
+// Si dos cabezas chocan, ambas quedan marcadas para desaparecer.
+void eliminarSerpientesColisionadas(std::vector<Serpiente>& serpientes) {
+    const std::size_t cantidad = serpientes.size();
+    std::vector<bool> eliminada(cantidad, false);
+
+    // Se comparan por parejas para no repetir comprobaciones.
+    for (std::size_t i = 0; i < cantidad; ++i) {
+        for (std::size_t j = i + 1; j < cantidad; ++j) {
+            const Segmento& cabezaI = serpientes[i].segmentos[0];
+            const Segmento& cabezaJ = serpientes[j].segmentos[0];
+
+            // Cabeza contra cabeza: desaparecen ambas.
+            if (segmentosColisionan(cabezaI, cabezaJ)) {
+                eliminada[i] = true;
+                eliminada[j] = true;
+                continue;
+            }
+
+            // La cabeza de i contra el cuerpo de j.
+            // Se comienza en 1 porque el segmento 0 es la cabeza.
+            for (std::size_t k = 1;
+                 k < serpientes[j].segmentos.size() && !eliminada[i];
+                 ++k) {
+                if (segmentosColisionan(cabezaI, serpientes[j].segmentos[k])) {
+                    eliminada[i] = true;
+                }
+            }
+
+            // La cabeza de j contra el cuerpo de i.
+            for (std::size_t k = 1;
+                 k < serpientes[i].segmentos.size() && !eliminada[j];
+                 ++k) {
+                if (segmentosColisionan(cabezaJ, serpientes[i].segmentos[k])) {
+                    eliminada[j] = true;
+                }
+            }
+        }
+    }
+
+    // El borrado se hace después de revisar todas las colisiones.
+    std::size_t indice = 0;
+    serpientes.erase(
+        std::remove_if(
+            serpientes.begin(),
+            serpientes.end(),
+            [&eliminada, &indice](const Serpiente&) {
+                return eliminada[indice++];
+            }
+        ),
+        serpientes.end()
+    );
 }
 
 void dibujarSerpiente(SDL_Renderer* renderer, const Serpiente& s) {
@@ -176,6 +256,19 @@ int main(int argc, char* argv[]) {
 
         for (Serpiente& s : serpientes) {
             actualizarSerpiente(s);
+        }
+
+        eliminarSerpientesColisionadas(serpientes);
+        if (serpientes.size() <= 1) {
+            serpientes.clear();
+
+            for (int i = 0; i < numSerpientes; ++i) {
+                serpientes.push_back(crearSerpiente());
+            }
+
+            contadorFrames = 0;
+            fpsActual = 0.0;
+            ultimoReporteFPS = SDL_GetTicks();
         }
 
         SDL_SetRenderDrawColor(renderer, 25, 25, 35, 255);
