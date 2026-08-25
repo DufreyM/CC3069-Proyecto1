@@ -1,9 +1,9 @@
 /*
- * Prueba de concepto - Screensaver "Serpientes IA"
+ * Screensaver "Multisnake" - Version SECUENCIAL
  * Universidad del Valle de Guatemala - Computacion Paralela y Distribuida
  *
- * Version SECUENCIAL y minimal para validar SDL2 antes de la version
- * completa (N serpientes, comida, colisiones, IA, OpenMP).
+ * N (arg[1]) indica la cantidad de serpientes a renderizar.
+ * Version paralela con OpenMP pendiente.
  *
  * Compilacion:
  *   g++ Screensaver.cpp -o Screensaver -I<SDL2_include> -L<SDL2_lib> -lmingw32 -lSDL2main -lSDL2 -mwindows
