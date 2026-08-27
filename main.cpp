@@ -1,0 +1,132 @@
+/*
+ * Screensaver "Multisnake" - Version SECUENCIAL
+ * Universidad del Valle de Guatemala - Computacion Paralela y Distribuida
+ *
+ * N (arg[1]) indica la cantidad de serpientes a renderizar.
+ * Version paralela con OpenMP pendiente.
+ *
+ * Compilacion:
+ *   g++ *.cpp -o Screensaver -I<SDL2_include> -L<SDL2_lib> -lmingw32 -lSDL2main -lSDL2 -mwindows
+ */
+
+#include "util.h"
+#include "serpiente.h"
+#include "colisiones.h"
+#include "comida.h"
+
+#include <cstdio>
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+
+int main(int argc, char* argv[]) {
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+    int numSerpientes = leerParametroN(argc, argv);
+
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        std::fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    SDL_Window* ventana = SDL_CreateWindow(
+        "Multisnake (FPS: --)",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        ANCHO_VENTANA, ALTO_VENTANA,
+        SDL_WINDOW_SHOWN
+    );
+    if (!ventana) {
+        std::fprintf(stderr, "Error al crear ventana: %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    SDL_Renderer* renderer = SDL_CreateRenderer(
+        ventana, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+    );
+    if (!renderer) {
+        std::fprintf(stderr, "Error al crear renderer: %s\n", SDL_GetError());
+        SDL_DestroyWindow(ventana);
+        SDL_Quit();
+        return 1;
+    }
+
+    std::vector<Serpiente> serpientes;
+    serpientes.reserve(numSerpientes);
+    for (int i = 0; i < numSerpientes; ++i) {
+        serpientes.push_back(crearSerpiente());
+    }
+
+    bool ejecutando = true;
+    SDL_Event evento;
+
+    int contadorFrames = 0;
+    double fpsActual = 0.0;
+    Uint32 ultimoReporteFPS = SDL_GetTicks();
+
+    Comida comida = crearComida();
+
+    while (ejecutando) {
+        while (SDL_PollEvent(&evento)) {
+            if (evento.type == SDL_QUIT) ejecutando = false;
+            if (evento.type == SDL_KEYDOWN && evento.key.keysym.sym == SDLK_ESCAPE) {
+                ejecutando = false;
+            }
+        }
+
+        for (Serpiente& s : serpientes) {
+            actualizarSerpiente(s);
+        }
+
+        for (Serpiente& s : serpientes) {
+            if (serpienteComeComida(s, comida)) {
+                hacerCrecer(s);
+                comida = crearComida();
+                break;
+            }
+        }
+
+        eliminarSerpientesColisionadas(serpientes);
+        if (serpientes.size() <= 1) {
+            serpientes.clear();
+
+            for (int i = 0; i < numSerpientes; ++i) {
+                serpientes.push_back(crearSerpiente());
+            }
+
+            comida = crearComida();
+
+            contadorFrames = 0;
+            fpsActual = 0.0;
+            ultimoReporteFPS = SDL_GetTicks();
+        }
+
+        SDL_SetRenderDrawColor(renderer, 25, 25, 35, 255);
+        SDL_RenderClear(renderer);
+        dibujarComida(renderer, comida);
+
+        for (const Serpiente& s : serpientes) {
+            dibujarSerpiente(renderer, s);
+        }
+
+        SDL_RenderPresent(renderer);
+
+        contadorFrames++;
+        Uint32 ahora = SDL_GetTicks();
+        if (ahora - ultimoReporteFPS >= 500) {
+            fpsActual = contadorFrames / ((ahora - ultimoReporteFPS) / 1000.0);
+            contadorFrames = 0;
+            ultimoReporteFPS = ahora;
+
+            char titulo[128];
+            std::snprintf(titulo, sizeof(titulo), "Multisnake N=%d (FPS: %.2f)", numSerpientes, fpsActual);
+            SDL_SetWindowTitle(ventana, titulo);
+        }
+    }
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(ventana);
+    SDL_Quit();
+
+    return 0;
+}
