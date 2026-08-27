@@ -4,6 +4,16 @@ Universidad del Valle de Guatemala - Computación Paralela y Distribuida
 
 ## Herramienta gráfica: SDL2
 
+## Estructura del código
+
+| Archivo | Contenido |
+|---|---|
+| `main.cpp` | `main()`, inicialización de SDL y el loop principal |
+| `util.h/.cpp` | Constantes, `Segmento`, dibujo de círculos, números aleatorios, parseo de `N` |
+| `serpiente.h/.cpp` | `Serpiente` y su movimiento/dibujo |
+| `colisiones.h/.cpp` | Detección y eliminación de serpientes colisionadas |
+| `comida.h/.cpp` | `Comida` y su generación/consumo |
+
 ## Compilación en Windows (MinGW-w64)
 
 Estos pasos asumen que ya tienes instalado **MinGW-w64** (g++) y que corres los comandos desde Git Bash / MSYS.
@@ -24,7 +34,7 @@ Estos pasos asumen que ya tienes instalado **MinGW-w64** (g++) y que corres los 
 
    ```bash
    SDLROOT="libs/SDL2-2.30.9/x86_64-w64-mingw32"
-   g++ Screensaver.cpp -o Screensaver.exe -I"$SDLROOT/include" -L"$SDLROOT/lib" -lmingw32 -lSDL2main -lSDL2 -mwindows
+   g++ *.cpp -o Screensaver.exe -I"$SDLROOT/include" -L"$SDLROOT/lib" -lmingw32 -lSDL2main -lSDL2 -mwindows
    ```
 
 4. Copia `SDL2.dll` junto al ejecutable (necesario en tiempo de ejecución):
@@ -43,7 +53,7 @@ Estos pasos asumen que ya tienes instalado **MinGW-w64** (g++) y que corres los 
 sudo apt install libsdl2-dev   # Debian/Ubuntu
 # o: brew install sdl2         # macOS
 
-g++ Screensaver.cpp -o Screensaver $(sdl2-config --cflags --libs)
+g++ *.cpp -o Screensaver $(sdl2-config --cflags --libs)
 ./Screensaver
 ```
 
