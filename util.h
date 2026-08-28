@@ -21,7 +21,7 @@ static const int RADIO_COMIDA = 6;
 // frame dentro de la zona de costo mayor: a proposito caro de calcular, para
 // tener carga desigual entre serpientes y poder comparar schedule(static)
 // contra dynamic/guided en la version paralela.
-static const int ITERACIONES_ZONA_COSTOSA = 500;
+static const int ITERACIONES_ZONA_COSTOSA = 700;
 
 struct Segmento {
     float x, y;

@@ -16,7 +16,7 @@ static void aplicarOndulacionCostosa(Serpiente& s) {
 
     float giro = 0.0f;
     for (int k = 1; k <= ITERACIONES_ZONA_COSTOSA; ++k) {
-        giro += std::sin(fase + static_cast<float>(k) * 0.05f) * 0.00006f;
+        giro += std::sin(fase + static_cast<float>(k) * 0.05f) * 0.00016f;
     }
 
     float cosGiro = std::cos(giro);
