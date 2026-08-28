@@ -96,9 +96,10 @@ int main(int argc, char* argv[]) {
 
         eliminarSerpientesColisionadas(serpientes);
         if (serpientes.size() <= 1) {
-            serpientes.clear();
-
-            for (int i = 0; i < numSerpientes; ++i) {
+            // Se rellena hasta numSerpientes en vez de vaciar el vector:
+            // si queda una sobreviviente, no choco con nadie y no deberia
+            // desaparecer solo por ser la ultima.
+            while (static_cast<int>(serpientes.size()) < numSerpientes) {
                 serpientes.push_back(crearSerpiente());
             }
 
