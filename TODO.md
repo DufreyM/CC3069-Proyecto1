@@ -8,17 +8,19 @@ Antes de empezar: `git pull`. Todos tocamos `Screensaver.cpp`, así que conviene
 avisar en el chat del equipo qué función estás editando y commitear seguido en
 piezas chicas para minimizar conflictos de merge.
 
-## Leonardo — prototipo de paralelización con OpenMP
+## Leonardo — prototipo de paralelización con OpenMP [DONE]
 
-- Agregar `-fopenmp` a las instrucciones de compilación del README (Windows/Linux/macOS).
-- Paralelizar `actualizarSerpiente` sobre el vector de serpientes con
-  `#pragma omp parallel for` — es paralelizable porque cada serpiente es
-  independiente de las demás en esta etapa (mismo principio que el ejemplo de
-  burbujas de la diapositiva de planificación de loops).
-- Probar primero con `schedule(static)` (carga pareja entre serpientes, bajo
-  overhead — diapositiva 13).
-- No borrar la versión secuencial: dejar ambas disponibles para poder comparar
-  tiempos (p. ej. con un flag de compilación o un segundo target de build).
+- [x] `-fopenmp` agregado a las instrucciones de compilación del README (Windows/Linux/macOS).
+- [x] `actualizarSerpientes()` en `serpiente.cpp` reparte el update de cada
+  serpiente con `#pragma omp parallel for schedule(static)` — es paralelizable
+  porque cada serpiente es independiente de las demás en esta etapa (mismo
+  principio que el ejemplo de burbujas de la diapositiva de planificación de
+  loops).
+- [x] Compila y corre igual con y sin `-fopenmp` (con el flag imprime cuántos
+  hilos usa; sin el flag, GCC ignora el pragma y corre secuencial).
+- Pendiente / siguiente: aplicar lo mismo a colisiones y comida cuando esos
+  loops crezcan, y comparar tiempos secuencial vs. paralelo una vez que Maria
+  Jose tenga el modo de medición.
 
 ## Maria Jose — instrumentación de tiempos (Anexo 3)
 
