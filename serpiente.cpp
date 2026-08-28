@@ -38,8 +38,8 @@ Serpiente crearSerpiente() {
         s.segmentos[i].y = yInicial;
     }
 
-    s.velX = aleatorioEnRango(1.5f, 3.5f) * (std::rand() % 2 == 0 ? 1.0f : -1.0f);
-    s.velY = aleatorioEnRango(1.5f, 3.5f) * (std::rand() % 2 == 0 ? 1.0f : -1.0f);
+    s.velX = aleatorioEnRango(VELOCIDAD_MIN, VELOCIDAD_MAX) * (std::rand() % 2 == 0 ? 1.0f : -1.0f);
+    s.velY = aleatorioEnRango(VELOCIDAD_MIN, VELOCIDAD_MAX) * (std::rand() % 2 == 0 ? 1.0f : -1.0f);
 
     s.r = static_cast<Uint8>(aleatorioEnRango(80.0f, 255.0f));
     s.g = static_cast<Uint8>(aleatorioEnRango(80.0f, 255.0f));
