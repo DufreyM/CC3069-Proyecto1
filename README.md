@@ -34,7 +34,7 @@ Estos pasos asumen que ya tienes instalado **MinGW-w64** (g++) y que corres los 
 
    ```bash
    SDLROOT="libs/SDL2-2.30.9/x86_64-w64-mingw32"
-   g++ *.cpp -o Screensaver.exe -I"$SDLROOT/include" -L"$SDLROOT/lib" -lmingw32 -lSDL2main -lSDL2 -mwindows
+   g++ *.cpp -o Screensaver.exe -fopenmp -I"$SDLROOT/include" -L"$SDLROOT/lib" -lmingw32 -lSDL2main -lSDL2 -mwindows
    ```
 
 4. Copia `SDL2.dll` junto al ejecutable (necesario en tiempo de ejecución):
@@ -53,7 +53,7 @@ Estos pasos asumen que ya tienes instalado **MinGW-w64** (g++) y que corres los 
 sudo apt install libsdl2-dev   # Debian/Ubuntu
 # o: brew install sdl2         # macOS
 
-g++ *.cpp -o Screensaver $(sdl2-config --cflags --libs)
+g++ *.cpp -o Screensaver -fopenmp $(sdl2-config --cflags --libs)
 ./Screensaver
 ```
 

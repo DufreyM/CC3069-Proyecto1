@@ -3,6 +3,8 @@
 *.dll
 *.o
 *.obj
+/Screensaver
+/ScreensaverSeq
 
 # Librerias descargadas (SDL2 dev, ~7MB, se descarga aparte)
 libs/
