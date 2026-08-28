@@ -51,6 +51,18 @@ void actualizarSerpiente(Serpiente& s) {
     }
 }
 
+void actualizarSerpientes(std::vector<Serpiente>& serpientes) {
+    const int total = static_cast<int>(serpientes.size());
+
+    // schedule(static): todas las serpientes hacen la misma cantidad de
+    // trabajo por frame, asi que repartirlas en bloques fijos entre hilos
+    // alcanza el balance de carga sin el overhead de dynamic/guided.
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i < total; ++i) {
+        actualizarSerpiente(serpientes[i]);
+    }
+}
+
 void dibujarSerpiente(SDL_Renderer* renderer, const Serpiente& s) {
     for (std::size_t i = 0; i < s.segmentos.size(); ++i) {
         if (i == 0) {

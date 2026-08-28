@@ -19,10 +19,20 @@
 #include <cstdlib>
 #include <vector>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 int main(int argc, char* argv[]) {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     int numSerpientes = leerParametroN(argc, argv);
+
+#ifdef _OPENMP
+    std::fprintf(stderr, "OpenMP activo: %d hilos disponibles\n", omp_get_max_threads());
+#else
+    std::fprintf(stderr, "OpenMP no activo (compilar con -fopenmp para paralelizar)\n");
+#endif
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
@@ -74,9 +84,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        for (Serpiente& s : serpientes) {
-            actualizarSerpiente(s);
-        }
+        actualizarSerpientes(serpientes);
 
         for (Serpiente& s : serpientes) {
             if (serpienteComeComida(s, comida)) {

@@ -16,4 +16,9 @@ Serpiente crearSerpiente();
 // Avanza la cabeza, rebota en los bordes y propaga la posicion al resto de la cola
 void actualizarSerpiente(Serpiente& s);
 
+// Actualiza todas las serpientes. Cada una es independiente de las demas en
+// esta etapa (no leen ni modifican el estado de otra), por lo que el trabajo
+// se reparte entre hilos con OpenMP cuando esta disponible.
+void actualizarSerpientes(std::vector<Serpiente>& serpientes);
+
 void dibujarSerpiente(SDL_Renderer* renderer, const Serpiente& s);
