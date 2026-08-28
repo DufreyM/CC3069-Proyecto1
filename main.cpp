@@ -14,6 +14,7 @@
 #include "colisiones.h"
 #include "comida.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <ctime>
 #include <cstdlib>
@@ -42,14 +43,15 @@ int main(int argc, char* argv[]) {
     SDL_Window* ventana = SDL_CreateWindow(
         "Multisnake (FPS: --)",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        ANCHO_VENTANA, ALTO_VENTANA,
-        SDL_WINDOW_SHOWN
+        anchoVentana, altoVentana,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     if (!ventana) {
         std::fprintf(stderr, "Error al crear ventana: %s\n", SDL_GetError());
         SDL_Quit();
         return 1;
     }
+    SDL_SetWindowMinimumSize(ventana, ANCHO_MINIMO, ALTO_MINIMO);
 
     SDL_Renderer* renderer = SDL_CreateRenderer(
         ventana, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
@@ -82,6 +84,12 @@ int main(int argc, char* argv[]) {
             if (evento.type == SDL_KEYDOWN && evento.key.keysym.sym == SDLK_ESCAPE) {
                 ejecutando = false;
             }
+            if (evento.type == SDL_WINDOWEVENT && evento.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                // El area de juego sigue el tamano real de la ventana, nunca
+                // por debajo del minimo exigido (640x480).
+                anchoVentana = std::max(evento.window.data1, ANCHO_MINIMO);
+                altoVentana = std::max(evento.window.data2, ALTO_MINIMO);
+            }
         }
 
         actualizarSerpientes(serpientes);
@@ -112,7 +120,7 @@ int main(int argc, char* argv[]) {
 
         SDL_SetRenderDrawColor(renderer, 25, 25, 35, 255);
         SDL_RenderClear(renderer);
-        dibujarZonaCostosa(renderer);
+        dibujarZonaCostosa(renderer, SDL_GetTicks());
         dibujarComida(renderer, comida);
 
         for (const Serpiente& s : serpientes) {

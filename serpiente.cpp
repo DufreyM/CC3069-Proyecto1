@@ -3,29 +3,36 @@
 #include <cmath>
 #include <cstdlib>
 
-// Dentro de la zona de costo mayor, acumula varias componentes seno/coseno
-// para producir un pequeno temblor. A proposito es una suma de muchos
-// terminos (no una formula cerrada): simula un calculo caro por iteracion,
-// como el ejemplo de la diapositiva de planificacion de loops.
-static void aplicarOndulacionCostosa(Segmento& cabeza) {
-    float anguloBase = cabeza.x * 0.05f + cabeza.y * 0.03f;
-    float dx = 0.0f;
-    float dy = 0.0f;
+// Dentro de la zona de costo mayor, gira el vector de velocidad un angulo
+// pequeno cada frame: la serpiente entra recta y sale trazando una espiral,
+// bien distinto del rebote normal en el resto del canvas. El angulo sale de
+// sumar muchos terminos seno (no una formula cerrada) a proposito, para
+// simular un calculo caro por iteracion, como el ejemplo de la diapositiva
+// de planificacion de loops. Depende de la posicion de la cabeza para que el
+// compilador no pueda precalcularlo en tiempo de compilacion.
+static void aplicarOndulacionCostosa(Serpiente& s) {
+    const Segmento& cabeza = s.segmentos[0];
+    float fase = cabeza.x * 0.017f + cabeza.y * 0.011f;
+
+    float giro = 0.0f;
     for (int k = 1; k <= ITERACIONES_ZONA_COSTOSA; ++k) {
-        float angulo = anguloBase + static_cast<float>(k);
-        dx += std::cos(angulo) * 0.0006f;
-        dy += std::sin(angulo) * 0.0006f;
+        giro += std::sin(fase + static_cast<float>(k) * 0.05f) * 0.00006f;
     }
-    cabeza.x += dx;
-    cabeza.y += dy;
+
+    float cosGiro = std::cos(giro);
+    float sinGiro = std::sin(giro);
+    float nuevaVelX = s.velX * cosGiro - s.velY * sinGiro;
+    float nuevaVelY = s.velX * sinGiro + s.velY * cosGiro;
+    s.velX = nuevaVelX;
+    s.velY = nuevaVelY;
 }
 
 Serpiente crearSerpiente() {
     Serpiente s;
     s.segmentos.resize(SEGMENTOS_POR_SERPIENTE);
 
-    float xInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, ANCHO_VENTANA - RADIO_SEGMENTO * 2.0f);
-    float yInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, ALTO_VENTANA - RADIO_SEGMENTO * 2.0f);
+    float xInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, anchoVentana - RADIO_SEGMENTO * 2.0f);
+    float yInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, altoVentana - RADIO_SEGMENTO * 2.0f);
     for (int i = 0; i < SEGMENTOS_POR_SERPIENTE; ++i) {
         s.segmentos[i].x = xInicial - i * (RADIO_SEGMENTO * 1.6f);
         s.segmentos[i].y = yInicial;
@@ -52,22 +59,22 @@ void actualizarSerpiente(Serpiente& s) {
     cabeza.y += s.velY;
 
     if (dentroDeZonaCostosa(cabeza.x, cabeza.y)) {
-        aplicarOndulacionCostosa(cabeza);
+        aplicarOndulacionCostosa(s);
     }
 
     if (cabeza.x - RADIO_SEGMENTO < 0) {
         cabeza.x = RADIO_SEGMENTO;
         s.velX = std::fabs(s.velX);
-    } else if (cabeza.x + RADIO_SEGMENTO > ANCHO_VENTANA) {
-        cabeza.x = ANCHO_VENTANA - RADIO_SEGMENTO;
+    } else if (cabeza.x + RADIO_SEGMENTO > anchoVentana) {
+        cabeza.x = anchoVentana - RADIO_SEGMENTO;
         s.velX = -std::fabs(s.velX);
     }
 
     if (cabeza.y - RADIO_SEGMENTO < 0) {
         cabeza.y = RADIO_SEGMENTO;
         s.velY = std::fabs(s.velY);
-    } else if (cabeza.y + RADIO_SEGMENTO > ALTO_VENTANA) {
-        cabeza.y = ALTO_VENTANA - RADIO_SEGMENTO;
+    } else if (cabeza.y + RADIO_SEGMENTO > altoVentana) {
+        cabeza.y = altoVentana - RADIO_SEGMENTO;
         s.velY = -std::fabs(s.velY);
     }
 }

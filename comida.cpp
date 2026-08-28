@@ -5,12 +5,12 @@ Comida crearComida() {
 
     comida.posicion.x = aleatorioEnRango(
         RADIO_COMIDA,
-        ANCHO_VENTANA - RADIO_COMIDA
+        anchoVentana - RADIO_COMIDA
     );
 
     comida.posicion.y = aleatorioEnRango(
         RADIO_COMIDA,
-        ALTO_VENTANA - RADIO_COMIDA
+        altoVentana - RADIO_COMIDA
     );
 
     comida.r = 255;
