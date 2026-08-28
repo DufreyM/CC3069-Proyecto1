@@ -3,6 +3,23 @@
 #include <cmath>
 #include <cstdlib>
 
+// Dentro de la zona de costo mayor, acumula varias componentes seno/coseno
+// para producir un pequeno temblor. A proposito es una suma de muchos
+// terminos (no una formula cerrada): simula un calculo caro por iteracion,
+// como el ejemplo de la diapositiva de planificacion de loops.
+static void aplicarOndulacionCostosa(Segmento& cabeza) {
+    float anguloBase = cabeza.x * 0.05f + cabeza.y * 0.03f;
+    float dx = 0.0f;
+    float dy = 0.0f;
+    for (int k = 1; k <= ITERACIONES_ZONA_COSTOSA; ++k) {
+        float angulo = anguloBase + static_cast<float>(k);
+        dx += std::cos(angulo) * 0.0006f;
+        dy += std::sin(angulo) * 0.0006f;
+    }
+    cabeza.x += dx;
+    cabeza.y += dy;
+}
+
 Serpiente crearSerpiente() {
     Serpiente s;
     s.segmentos.resize(SEGMENTOS_POR_SERPIENTE);
@@ -33,6 +50,10 @@ void actualizarSerpiente(Serpiente& s) {
     Segmento& cabeza = s.segmentos[0];
     cabeza.x += s.velX;
     cabeza.y += s.velY;
+
+    if (dentroDeZonaCostosa(cabeza.x, cabeza.y)) {
+        aplicarOndulacionCostosa(cabeza);
+    }
 
     if (cabeza.x - RADIO_SEGMENTO < 0) {
         cabeza.x = RADIO_SEGMENTO;

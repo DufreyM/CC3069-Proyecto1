@@ -11,6 +11,22 @@ void dibujarCirculoRelleno(SDL_Renderer* renderer, int cx, int cy, int radio) {
     }
 }
 
+void dibujarZonaCostosa(SDL_Renderer* renderer) {
+    SDL_SetRenderDrawColor(renderer, 90, 40, 45, 255);
+    SDL_Rect zona = {
+        ZONA_COSTOSA_X0,
+        ZONA_COSTOSA_Y0,
+        ZONA_COSTOSA_X1 - ZONA_COSTOSA_X0,
+        ZONA_COSTOSA_Y1 - ZONA_COSTOSA_Y0
+    };
+    SDL_RenderDrawRect(renderer, &zona);
+}
+
+bool dentroDeZonaCostosa(float x, float y) {
+    return x >= ZONA_COSTOSA_X0 && x <= ZONA_COSTOSA_X1 &&
+           y >= ZONA_COSTOSA_Y0 && y <= ZONA_COSTOSA_Y1;
+}
+
 float aleatorioEnRango(float minimo, float maximo) {
     return minimo + static_cast<float>(std::rand()) / RAND_MAX * (maximo - minimo);
 }

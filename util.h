@@ -12,6 +12,16 @@ static const int N_MIN = 1;
 static const int N_MAX = 200; // limite defensivo para no degradar los FPS
 static const int RADIO_COMIDA = 6;
 
+// Zona rectangular donde el movimiento de una serpiente se vuelve ondulante
+// (trigonometria) y, a proposito, mas cara de calcular que en el resto del
+// canvas. Sirve para tener carga desigual entre serpientes y poder comparar
+// schedule(static) contra dynamic/guided en la version paralela.
+static const int ZONA_COSTOSA_X0 = ANCHO_VENTANA / 3;
+static const int ZONA_COSTOSA_Y0 = ALTO_VENTANA / 3;
+static const int ZONA_COSTOSA_X1 = ANCHO_VENTANA * 2 / 3;
+static const int ZONA_COSTOSA_Y1 = ALTO_VENTANA * 2 / 3;
+static const int ITERACIONES_ZONA_COSTOSA = 500;
+
 struct Segmento {
     float x, y;
 };
@@ -19,6 +29,12 @@ struct Segmento {
 // Circulo relleno via scanline: por cada fila dy, dibuja una linea horizontal
 // del ancho correspondiente a la cuerda del circulo en esa altura.
 void dibujarCirculoRelleno(SDL_Renderer* renderer, int cx, int cy, int radio);
+
+// Dibuja el contorno de la zona de costo mayor (referencia visual).
+void dibujarZonaCostosa(SDL_Renderer* renderer);
+
+// Indica si un punto cae dentro de la zona de costo mayor.
+bool dentroDeZonaCostosa(float x, float y);
 
 // Numero pseudoaleatorio en [minimo, maximo]
 float aleatorioEnRango(float minimo, float maximo);

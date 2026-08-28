@@ -111,6 +111,7 @@ int main(int argc, char* argv[]) {
 
         SDL_SetRenderDrawColor(renderer, 25, 25, 35, 255);
         SDL_RenderClear(renderer);
+        dibujarZonaCostosa(renderer);
         dibujarComida(renderer, comida);
 
         for (const Serpiente& s : serpientes) {
