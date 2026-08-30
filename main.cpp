@@ -20,6 +20,10 @@
 #include <cstdlib>
 #include <vector>
 
+#include <iostream>
+#include <chrono>
+#include <string>
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -28,6 +32,16 @@ int main(int argc, char* argv[]) {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     int numSerpientes = leerParametroN(argc, argv);
+
+    bool benchMode = false;
+    int targetFrames = 0;
+
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "--bench" && i + 1 < argc) {
+            benchMode = true;
+            targetFrames = std::atoi(argv[i + 1]);
+        }
+    }
 
 #ifdef _OPENMP
     std::fprintf(stderr, "OpenMP activo: %d hilos disponibles\n", omp_get_max_threads());
@@ -53,8 +67,13 @@ int main(int argc, char* argv[]) {
     }
     SDL_SetWindowMinimumSize(ventana, ANCHO_MINIMO, ALTO_MINIMO);
 
+    Uint32 rendererFlags = SDL_RENDERER_ACCELERATED;
+    if (!benchMode) {
+        rendererFlags |= SDL_RENDERER_PRESENTVSYNC;
+    }
+
     SDL_Renderer* renderer = SDL_CreateRenderer(
-        ventana, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+        ventana, -1, rendererFlags
     );
     if (!renderer) {
         std::fprintf(stderr, "Error al crear renderer: %s\n", SDL_GetError());
@@ -82,7 +101,16 @@ int main(int argc, char* argv[]) {
         comidas.push_back(crearComida(serpientes));
     }
 
+    int benchFrameCount = 0;
+    auto benchStart = std::chrono::high_resolution_clock::now();
+
     while (ejecutando) {
+        if (benchMode && benchFrameCount >= targetFrames) {
+            ejecutando = false;
+            break;
+        }
+        benchFrameCount++;
+
         while (SDL_PollEvent(&evento)) {
             if (evento.type == SDL_QUIT) ejecutando = false;
             if (evento.type == SDL_KEYDOWN && evento.key.keysym.sym == SDLK_ESCAPE) {
@@ -156,6 +184,15 @@ int main(int argc, char* argv[]) {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(ventana);
     SDL_Quit();
+
+    if (benchMode) {
+        auto benchEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> diff = benchEnd - benchStart;
+        double tiempoTotal = diff.count();
+        double fpsPromedio = benchFrameCount / tiempoTotal;
+
+        std::cout << numSerpientes << "," << benchFrameCount << "," << tiempoTotal << "," << fpsPromedio << std::endl;
+    }
 
     return 0;
 }
