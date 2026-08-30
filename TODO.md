@@ -34,17 +34,18 @@ piezas chicas para minimizar conflictos de merge.
 - Referencia: requisito E del enunciado — el speedup se calcula con el
   promedio o el máximo de las mediciones anteriores.
 
-## Cindy — comida múltiple y defensiva de spawn
+## Cindy — comida múltiple y defensiva de spawn [DONE]
 
-- Cambiar la comida única (`Comida comida`) a `std::vector<Comida> comidas`
-  (por ahora un número fijo, ej. `NUM_COMIDA`).
-- Al generar una comida (o serpiente) nueva, evitar que aparezca encima de una
-  serpiente existente — validación defensiva de posición, en la línea de lo
-  que ya hicimos con el argumento `N`.
-- Actualizar `serpienteComeComida` / `hacerCrecer` para recorrer el vector de
-  comidas en vez de un solo elemento.
-- Esto da más elementos en pantalla y hace que valga la pena paralelizar
-  también ese loop más adelante.
+- [x] Cambiada la comida única (`Comida comida`) a `std::vector<Comida> comidas`
+  con cantidad fija `NUM_COMIDA` (5) en `util.h`.
+- [x] `posicionOcupada()` (`colisiones.h`/`.cpp`) evita que `crearComida()` y
+  `crearSerpiente()` aparezcan encima de una serpiente existente, reintentando
+  la posición hasta `INTENTOS_MAX_SPAWN` veces sin colgarse si no hay hueco
+  libre — misma idea defensiva que ya usamos con el argumento `N`.
+- [x] `procesarComidas()` en `comida.cpp` encapsula el recorrido del vector de
+  comidas por serpiente (`serpienteComeComida` / `hacerCrecer` / respawn).
+- Pendiente / siguiente: este loop (y el de `eliminarSerpientesColisionadas`)
+  queda como candidato natural para paralelizar con OpenMP más adelante.
 
 ## Al terminar
 
