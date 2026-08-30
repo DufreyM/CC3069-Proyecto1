@@ -18,6 +18,16 @@ static const int N_MAX = 200; // limite defensivo para no degradar los FPS
 static const int RADIO_COMIDA = 6;
 static const int NUM_COMIDA = 5;
 static const int INTENTOS_MAX_SPAWN = 30; // limite defensivo para no colgar el spawn
+
+// Crecimiento por comida: base fija + un extra proporcional al tamano de la
+// ventana, para que se note por igual en canvases chicos y grandes (en vez
+// de un solo segmento, casi imperceptible en pantallas grandes).
+static const int SEGMENTOS_CRECIMIENTO_BASE = 3;
+static const int PIXELES_POR_SEGMENTO_EXTRA = 200;
+
+// Cuanto se gira la velocidad de una serpiente por frame hacia la comida
+// mas cercana (0 = ignora la comida, 1 = apunta de inmediato sin inercia).
+static const float FUERZA_BUSQUEDA_COMIDA = 0.06f;
 static const float VELOCIDAD_MIN = 1.0f; // px/frame por eje
 static const float VELOCIDAD_MAX = 2.2f; // px/frame por eje
 
@@ -50,6 +60,11 @@ bool dentroDeZonaCostosa(float x, float y);
 
 // Numero pseudoaleatorio en [minimo, maximo]
 float aleatorioEnRango(float minimo, float maximo);
+
+// Segmentos que se agregan a una serpiente por cada comida que se come,
+// escalado con el tamano actual de la ventana (ver SEGMENTOS_CRECIMIENTO_BASE
+// y PIXELES_POR_SEGMENTO_EXTRA).
+int calcularCrecimientoPorComida();
 
 // Lee y valida el parametro N (cantidad de serpientes). Si falta o es invalido,
 // avisa por stderr y ajusta a un valor seguro en lugar de fallar.

@@ -77,6 +77,10 @@ float aleatorioEnRango(float minimo, float maximo) {
     return minimo + static_cast<float>(std::rand()) / RAND_MAX * (maximo - minimo);
 }
 
+int calcularCrecimientoPorComida() {
+    return SEGMENTOS_CRECIMIENTO_BASE + (anchoVentana + altoVentana) / PIXELES_POR_SEGMENTO_EXTRA;
+}
+
 int leerParametroN(int argc, char* argv[]) {
     if (argc <= 1) {
         return N_POR_DEFECTO;

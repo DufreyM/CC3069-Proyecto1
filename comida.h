@@ -17,7 +17,8 @@ void dibujarComida(SDL_Renderer* renderer, const Comida& comida);
 
 bool serpienteComeComida(const Serpiente& serpiente, const Comida& comida);
 
-void hacerCrecer(Serpiente& serpiente);
+// Agrega `cantidad` segmentos en la posicion actual de la cola.
+void hacerCrecer(Serpiente& serpiente, int cantidad);
 
 // Recorre el vector de comidas por esta serpiente: si la come, la hace
 // crecer y repone esa comida (evitando aparecer sobre alguna serpiente).

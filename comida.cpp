@@ -56,17 +56,21 @@ bool serpienteComeComida(const Serpiente& serpiente, const Comida& comida) {
     return distanciaCuadrada <= distanciaMinima * distanciaMinima;
 }
 
-void hacerCrecer(Serpiente& serpiente) {
-    if (!serpiente.segmentos.empty()) {
-        // Agrega un segmento en la posición actual de la cola.
-        serpiente.segmentos.push_back(serpiente.segmentos.back());
+void hacerCrecer(Serpiente& serpiente, int cantidad) {
+    if (serpiente.segmentos.empty() || cantidad <= 0) {
+        return;
+    }
+
+    const Segmento cola = serpiente.segmentos.back();
+    for (int i = 0; i < cantidad; ++i) {
+        serpiente.segmentos.push_back(cola);
     }
 }
 
 void procesarComidas(Serpiente& serpiente, std::vector<Comida>& comidas, const std::vector<Serpiente>& serpientes) {
     for (Comida& c : comidas) {
         if (serpienteComeComida(serpiente, c)) {
-            hacerCrecer(serpiente);
+            hacerCrecer(serpiente, calcularCrecimientoPorComida());
             c = crearComida(serpientes);
             break;
         }
