@@ -18,3 +18,7 @@ void dibujarComida(SDL_Renderer* renderer, const Comida& comida);
 bool serpienteComeComida(const Serpiente& serpiente, const Comida& comida);
 
 void hacerCrecer(Serpiente& serpiente);
+
+// Recorre el vector de comidas por esta serpiente: si la come, la hace
+// crecer y repone esa comida (evitando aparecer sobre alguna serpiente).
+void procesarComidas(Serpiente& serpiente, std::vector<Comida>& comidas, const std::vector<Serpiente>& serpientes);

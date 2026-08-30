@@ -99,13 +99,7 @@ int main(int argc, char* argv[]) {
         actualizarSerpientes(serpientes);
 
         for (Serpiente& s : serpientes) {
-            for (Comida& c : comidas) {
-                if (serpienteComeComida(s, c)) {
-                    hacerCrecer(s);
-                    c = crearComida(serpientes);
-                    break;
-                }
-            }
+            procesarComidas(s, comidas, serpientes);
         }
 
         eliminarSerpientesColisionadas(serpientes);

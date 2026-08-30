@@ -62,3 +62,13 @@ void hacerCrecer(Serpiente& serpiente) {
         serpiente.segmentos.push_back(serpiente.segmentos.back());
     }
 }
+
+void procesarComidas(Serpiente& serpiente, std::vector<Comida>& comidas, const std::vector<Serpiente>& serpientes) {
+    for (Comida& c : comidas) {
+        if (serpienteComeComida(serpiente, c)) {
+            hacerCrecer(serpiente);
+            c = crearComida(serpientes);
+            break;
+        }
+    }
+}
