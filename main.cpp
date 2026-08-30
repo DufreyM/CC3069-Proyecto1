@@ -76,7 +76,11 @@ int main(int argc, char* argv[]) {
     double fpsActual = 0.0;
     Uint32 ultimoReporteFPS = SDL_GetTicks();
 
-    Comida comida = crearComida();
+    std::vector<Comida> comidas;
+    comidas.reserve(NUM_COMIDA);
+    for (int i = 0; i < NUM_COMIDA; ++i) {
+        comidas.push_back(crearComida());
+    }
 
     while (ejecutando) {
         while (SDL_PollEvent(&evento)) {
@@ -95,10 +99,12 @@ int main(int argc, char* argv[]) {
         actualizarSerpientes(serpientes);
 
         for (Serpiente& s : serpientes) {
-            if (serpienteComeComida(s, comida)) {
-                hacerCrecer(s);
-                comida = crearComida();
-                break;
+            for (Comida& c : comidas) {
+                if (serpienteComeComida(s, c)) {
+                    hacerCrecer(s);
+                    c = crearComida();
+                    break;
+                }
             }
         }
 
@@ -111,7 +117,10 @@ int main(int argc, char* argv[]) {
                 serpientes.push_back(crearSerpiente());
             }
 
-            comida = crearComida();
+            comidas.clear();
+            for (int i = 0; i < NUM_COMIDA; ++i) {
+                comidas.push_back(crearComida());
+            }
 
             contadorFrames = 0;
             fpsActual = 0.0;
@@ -121,7 +130,9 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(renderer, 25, 25, 35, 255);
         SDL_RenderClear(renderer);
         dibujarZonaCostosa(renderer, SDL_GetTicks());
-        dibujarComida(renderer, comida);
+        for (const Comida& c : comidas) {
+            dibujarComida(renderer, c);
+        }
 
         for (const Serpiente& s : serpientes) {
             dibujarSerpiente(renderer, s);
