@@ -1,4 +1,5 @@
 #include "serpiente.h"
+#include "colisiones.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -27,12 +28,21 @@ static void aplicarOndulacionCostosa(Serpiente& s) {
     s.velY = nuevaVelY;
 }
 
-Serpiente crearSerpiente() {
+Serpiente crearSerpiente(const std::vector<Serpiente>& serpientes) {
     Serpiente s;
     s.segmentos.resize(SEGMENTOS_POR_SERPIENTE);
 
-    float xInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, anchoVentana - RADIO_SEGMENTO * 2.0f);
-    float yInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, altoVentana - RADIO_SEGMENTO * 2.0f);
+    float xInicial = 0.0f;
+    float yInicial = 0.0f;
+    for (int intento = 0; intento < INTENTOS_MAX_SPAWN; ++intento) {
+        xInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, anchoVentana - RADIO_SEGMENTO * 2.0f);
+        yInicial = aleatorioEnRango(RADIO_SEGMENTO * 2.0f, altoVentana - RADIO_SEGMENTO * 2.0f);
+
+        if (!posicionOcupada(xInicial, yInicial, RADIO_SEGMENTO, serpientes)) {
+            break;
+        }
+    }
+
     for (int i = 0; i < SEGMENTOS_POR_SERPIENTE; ++i) {
         s.segmentos[i].x = xInicial - i * (RADIO_SEGMENTO * 1.6f);
         s.segmentos[i].y = yInicial;

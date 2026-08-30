@@ -11,6 +11,21 @@ bool segmentosColisionan(const Segmento& a, const Segmento& b) {
     return distanciaCuadrada <= distanciaMinima * distanciaMinima;
 }
 
+bool posicionOcupada(float x, float y, float radio, const std::vector<Serpiente>& serpientes) {
+    for (const Serpiente& s : serpientes) {
+        for (const Segmento& seg : s.segmentos) {
+            float dx = x - seg.x;
+            float dy = y - seg.y;
+            float distanciaMinima = radio + RADIO_SEGMENTO;
+
+            if (dx * dx + dy * dy <= distanciaMinima * distanciaMinima) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void eliminarSerpientesColisionadas(std::vector<Serpiente>& serpientes) {
     const std::size_t cantidad = serpientes.size();
     std::vector<bool> eliminada(cantidad, false);

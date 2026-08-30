@@ -17,6 +17,7 @@ static const int N_MIN = 1;
 static const int N_MAX = 200; // limite defensivo para no degradar los FPS
 static const int RADIO_COMIDA = 6;
 static const int NUM_COMIDA = 5;
+static const int INTENTOS_MAX_SPAWN = 30; // limite defensivo para no colgar el spawn
 static const float VELOCIDAD_MIN = 1.0f; // px/frame por eje
 static const float VELOCIDAD_MAX = 2.2f; // px/frame por eje
 

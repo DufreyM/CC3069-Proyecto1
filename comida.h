@@ -8,7 +8,10 @@ struct Comida {
 };
 
 // LÓGICA PARA LA GENERACIÓN DE COMIDA
-Comida crearComida();
+// Reintenta la posición (hasta INTENTOS_MAX_SPAWN veces) si cae encima de
+// una serpiente existente; si no encuentra un hueco libre, se queda con el
+// ultimo intento en vez de colgarse.
+Comida crearComida(const std::vector<Serpiente>& serpientes);
 
 void dibujarComida(SDL_Renderer* renderer, const Comida& comida);
 

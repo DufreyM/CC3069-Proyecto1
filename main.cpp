@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
     std::vector<Serpiente> serpientes;
     serpientes.reserve(numSerpientes);
     for (int i = 0; i < numSerpientes; ++i) {
-        serpientes.push_back(crearSerpiente());
+        serpientes.push_back(crearSerpiente(serpientes));
     }
 
     bool ejecutando = true;
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     std::vector<Comida> comidas;
     comidas.reserve(NUM_COMIDA);
     for (int i = 0; i < NUM_COMIDA; ++i) {
-        comidas.push_back(crearComida());
+        comidas.push_back(crearComida(serpientes));
     }
 
     while (ejecutando) {
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
             for (Comida& c : comidas) {
                 if (serpienteComeComida(s, c)) {
                     hacerCrecer(s);
-                    c = crearComida();
+                    c = crearComida(serpientes);
                     break;
                 }
             }
@@ -114,12 +114,12 @@ int main(int argc, char* argv[]) {
             // si queda una sobreviviente, no choco con nadie y no deberia
             // desaparecer solo por ser la ultima.
             while (static_cast<int>(serpientes.size()) < numSerpientes) {
-                serpientes.push_back(crearSerpiente());
+                serpientes.push_back(crearSerpiente(serpientes));
             }
 
             comidas.clear();
             for (int i = 0; i < NUM_COMIDA; ++i) {
-                comidas.push_back(crearComida());
+                comidas.push_back(crearComida(serpientes));
             }
 
             contadorFrames = 0;

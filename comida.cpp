@@ -1,17 +1,24 @@
 #include "comida.h"
+#include "colisiones.h"
 
-Comida crearComida() {
+Comida crearComida(const std::vector<Serpiente>& serpientes) {
     Comida comida;
 
-    comida.posicion.x = aleatorioEnRango(
-        RADIO_COMIDA,
-        anchoVentana - RADIO_COMIDA
-    );
+    for (int intento = 0; intento < INTENTOS_MAX_SPAWN; ++intento) {
+        comida.posicion.x = aleatorioEnRango(
+            RADIO_COMIDA,
+            anchoVentana - RADIO_COMIDA
+        );
 
-    comida.posicion.y = aleatorioEnRango(
-        RADIO_COMIDA,
-        altoVentana - RADIO_COMIDA
-    );
+        comida.posicion.y = aleatorioEnRango(
+            RADIO_COMIDA,
+            altoVentana - RADIO_COMIDA
+        );
+
+        if (!posicionOcupada(comida.posicion.x, comida.posicion.y, RADIO_COMIDA, serpientes)) {
+            break;
+        }
+    }
 
     comida.r = 255;
     comida.g = 80;

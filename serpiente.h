@@ -10,8 +10,10 @@ struct Serpiente {
     Uint8 r, g, b;
 };
 
-// Crea una serpiente con posicion inicial, velocidad y color pseudoaleatorios
-Serpiente crearSerpiente();
+// Crea una serpiente con posicion inicial, velocidad y color pseudoaleatorios.
+// Reintenta la posicion inicial (hasta INTENTOS_MAX_SPAWN veces) si cae
+// encima de una serpiente ya existente en la lista.
+Serpiente crearSerpiente(const std::vector<Serpiente>& serpientes);
 
 // Avanza la cabeza, rebota en los bordes y propaga la posicion al resto de la cola
 void actualizarSerpiente(Serpiente& s);
