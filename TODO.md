@@ -24,14 +24,14 @@ piezas chicas para minimizar conflictos de merge.
 
 ## Maria Jose — instrumentación de tiempos (Anexo 3)
 
-- Agregar un modo de medición (flag `--bench N_FRAMES` o similar) que corra un
+- [x] Agregar un modo de medición (flag `--bench N_FRAMES` o similar) que corra un
   número fijo de frames sin esperar vsync y al terminar imprima: N, frames,
   tiempo total y FPS promedio, en un formato fácil de pasar a tabla (CSV).
-- Con eso, correr al menos 10 mediciones por cada N de prueba (ej. 10, 50, 100,
+- [x] Con eso, correr al menos 10 mediciones por cada N de prueba (ej. 10, 50, 100,
   150, 200) sobre la versión secuencial actual y guardar los resultados
   (`mediciones.csv` o similar) — esto ya adelanta el Anexo 3 aunque la parte
   paralela no esté lista todavía.
-- Referencia: requisito E del enunciado — el speedup se calcula con el
+- [x] Referencia: requisito E del enunciado — el speedup se calcula con el
   promedio o el máximo de las mediciones anteriores.
 
 ## Cindy — comida múltiple y defensiva de spawn [DONE]

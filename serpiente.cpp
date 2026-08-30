@@ -31,6 +31,7 @@ static void aplicarOndulacionCostosa(Serpiente& s) {
 // Gira la velocidad de la serpiente hacia la comida mas cercana, sin cambiar
 // su rapidez actual. El giro es gradual (steering, no un salto instantaneo)
 // para que el movimiento siga viendose organico.
+
 static void buscarComidaCercana(Serpiente& s, const std::vector<Segmento>& posicionesComida) {
     if (posicionesComida.empty()) {
         return;
@@ -58,8 +59,22 @@ static void buscarComidaCercana(Serpiente& s, const std::vector<Segmento>& posic
     }
 
     float rapidez = std::sqrt(s.velX * s.velX + s.velY * s.velY);
+    if (rapidez < 0.0001f) {
+        return;
+    }
+
     float deseadoX = dx / distancia * rapidez;
     float deseadoY = dy / distancia * rapidez;
+
+    // Con steering constante existe un radio minimo de giro: cuando la comida
+    // queda dentro de el, la serpiente puede orbitarla indefinidamente. En la
+    // zona cercana eliminamos la componente tangencial apuntando directamente.
+    const float radioAproximacion = RADIO_SEGMENTO * 4.0f;
+    if (distancia <= radioAproximacion) {
+        s.velX = deseadoX;
+        s.velY = deseadoY;
+        return;
+    }
 
     s.velX += (deseadoX - s.velX) * FUERZA_BUSQUEDA_COMIDA;
     s.velY += (deseadoY - s.velY) * FUERZA_BUSQUEDA_COMIDA;
