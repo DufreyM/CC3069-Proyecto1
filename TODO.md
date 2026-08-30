@@ -44,6 +44,14 @@ piezas chicas para minimizar conflictos de merge.
   libre — misma idea defensiva que ya usamos con el argumento `N`.
 - [x] `procesarComidas()` en `comida.cpp` encapsula el recorrido del vector de
   comidas por serpiente (`serpienteComeComida` / `hacerCrecer` / respawn).
+- [x] Crecimiento notable: `hacerCrecer()` ahora agrega varios segmentos por
+  comida (no uno solo) usando `calcularCrecimientoPorComida()` (`util.h`/`.cpp`),
+  que escala con `ancho + alto` de la ventana para que se note igual en
+  canvases chicos y grandes.
+- [x] Las serpientes buscan comida: `buscarComidaCercana()` en `serpiente.cpp`
+  gira gradualmente la velocidad de cada serpiente hacia la comida más
+  cercana (`FUERZA_BUSQUEDA_COMIDA`), sin cambiar su rapidez. Ya no solo
+  rebotan al azar, sino que persiguen comer.
 - Pendiente / siguiente: este loop (y el de `eliminarSerpientesColisionadas`)
   queda como candidato natural para paralelizar con OpenMP más adelante.
 
