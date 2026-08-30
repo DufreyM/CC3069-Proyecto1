@@ -28,6 +28,52 @@ static void aplicarOndulacionCostosa(Serpiente& s) {
     s.velY = nuevaVelY;
 }
 
+// Gira la velocidad de la serpiente hacia la comida mas cercana, sin cambiar
+// su rapidez actual. El giro es gradual (steering, no un salto instantaneo)
+// para que el movimiento siga viendose organico.
+static void buscarComidaCercana(Serpiente& s, const std::vector<Segmento>& posicionesComida) {
+    if (posicionesComida.empty()) {
+        return;
+    }
+
+    const Segmento& cabeza = s.segmentos[0];
+    const Segmento* masCercana = &posicionesComida[0];
+    float distMinCuadrada = -1.0f;
+
+    for (const Segmento& comida : posicionesComida) {
+        float dx = comida.x - cabeza.x;
+        float dy = comida.y - cabeza.y;
+        float distCuadrada = dx * dx + dy * dy;
+        if (distMinCuadrada < 0.0f || distCuadrada < distMinCuadrada) {
+            distMinCuadrada = distCuadrada;
+            masCercana = &comida;
+        }
+    }
+
+    float dx = masCercana->x - cabeza.x;
+    float dy = masCercana->y - cabeza.y;
+    float distancia = std::sqrt(distMinCuadrada);
+    if (distancia < 0.0001f) {
+        return;
+    }
+
+    float rapidez = std::sqrt(s.velX * s.velX + s.velY * s.velY);
+    float deseadoX = dx / distancia * rapidez;
+    float deseadoY = dy / distancia * rapidez;
+
+    s.velX += (deseadoX - s.velX) * FUERZA_BUSQUEDA_COMIDA;
+    s.velY += (deseadoY - s.velY) * FUERZA_BUSQUEDA_COMIDA;
+
+    // Renormaliza para que el giro hacia la comida no vaya frenando ni
+    // acelerando a la serpiente con el paso de los frames.
+    float rapidezNueva = std::sqrt(s.velX * s.velX + s.velY * s.velY);
+    if (rapidezNueva > 0.0001f) {
+        float factor = rapidez / rapidezNueva;
+        s.velX *= factor;
+        s.velY *= factor;
+    }
+}
+
 Serpiente crearSerpiente(const std::vector<Serpiente>& serpientes) {
     Serpiente s;
     s.segmentos.resize(SEGMENTOS_POR_SERPIENTE);
@@ -58,11 +104,13 @@ Serpiente crearSerpiente(const std::vector<Serpiente>& serpientes) {
     return s;
 }
 
-void actualizarSerpiente(Serpiente& s) {
+void actualizarSerpiente(Serpiente& s, const std::vector<Segmento>& posicionesComida) {
     // Primero, cada segmento toma la posición anterior del segmento delantero.
     for (int i = static_cast<int>(s.segmentos.size()) - 1; i > 0; --i) {
         s.segmentos[i] = s.segmentos[i - 1];
     }
+
+    buscarComidaCercana(s, posicionesComida);
 
     Segmento& cabeza = s.segmentos[0];
     cabeza.x += s.velX;
@@ -89,15 +137,17 @@ void actualizarSerpiente(Serpiente& s) {
     }
 }
 
-void actualizarSerpientes(std::vector<Serpiente>& serpientes) {
+void actualizarSerpientes(std::vector<Serpiente>& serpientes, const std::vector<Segmento>& posicionesComida) {
     const int total = static_cast<int>(serpientes.size());
 
     // schedule(static): todas las serpientes hacen la misma cantidad de
     // trabajo por frame, asi que repartirlas en bloques fijos entre hilos
     // alcanza el balance de carga sin el overhead de dynamic/guided.
+    // posicionesComida solo se lee, nunca se modifica, asi que compartirla
+    // entre hilos es seguro.
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < total; ++i) {
-        actualizarSerpiente(serpientes[i]);
+        actualizarSerpiente(serpientes[i], posicionesComida);
     }
 }
 

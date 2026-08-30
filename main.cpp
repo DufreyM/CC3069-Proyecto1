@@ -96,7 +96,13 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        actualizarSerpientes(serpientes);
+        std::vector<Segmento> posicionesComida;
+        posicionesComida.reserve(comidas.size());
+        for (const Comida& c : comidas) {
+            posicionesComida.push_back(c.posicion);
+        }
+
+        actualizarSerpientes(serpientes, posicionesComida);
 
         for (Serpiente& s : serpientes) {
             procesarComidas(s, comidas, serpientes);
